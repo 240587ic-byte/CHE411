@@ -57,40 +57,38 @@ def dxdw(FA0,k,conc):
 ### liquid phase so change in moles will not be needed
 
 
-# define a rate of reaction
+
 def ror(conc):
     return -0.005*conc**1.5
-# from mass balance and rate law combined each streamline must satisfy this
+
 def dconcdx(x,conc,vmax,r,R):
     return ror(conc)/v(vmax,r,R)
-# solved from classical mechanics parabolic flow profile velocity
+
 def v(vmax,r,R):
     return vmax*(1-(r/R)**2)
 
-### initial conditions
 
-L=10 # length of reactor in meters
-R=0.1 # radius of reactor in meters
-cinit=1000 # initial conc in kmol/m**3
-vmax=0.1 # max flow speed in m/s
 
-# the quantization of streamlines can cannot do a calculation with infinite streamlines and at infinite points 
+L=10 
+R=0.1
+cinit=1000 
+vmax=0.1
+
+
 dr=np.linspace(R-0.000001,0,100)
 dx=np.linspace(0,L,1000)
 bothalf=[]
-# solve for each individual streamline as no mixing occurs, ror is known and velocity is known thus solveable
-# because of symmetry we only need to find half and can just reflect it
+
 for r in dr:
     sol=solve_ivp(dconcdx,t_span=(0,L),y0=[cinit],t_eval=dx,args=(vmax,r,R))
     bothalf.append(sol.y[0])
-# we only know the solution of the bottom half and now we need to reflect it
+
 tubesol=bothalf
-# this following steps wraps the solution array the correct way "reflecting" it
+
 for i in range(0,len(dr)-1):
     tubesol.append(bothalf[len(dr)-1-i])
-# once sol is made can plot, extent for the dimensions of graph, and aspect has auto sizing
+
 plt.imshow(bothalf,extent=[0,L,-R,R],cmap="inferno",aspect="auto")
-# misc labeling
 plt.colorbar(label="Concentration")
 plt.xlabel("Length (m)")
 plt.ylabel("Radius (m)")
